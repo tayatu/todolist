@@ -5,7 +5,11 @@ const bodyParser = require("body-parser");
 const date = require(__dirname + "/date.js");
 const mongoose = require("mongoose");
 const _=require("lodash");
+const dotenv = require("dotenv");
 const app = express();
+
+
+dotenv.config();
 
 app.set('view engine', 'ejs');
 
@@ -14,11 +18,17 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb+srv://admin-sarthak:sarthak123@cluster0.od01l.mongodb.net/todolistDB", {
-  useNewUrlParser: true,
-  useFindAndModify: false,
-  useUnifiedTopology: true
-});
+const connect = () => {
+  mongoose
+    .connect(process.env.MONGO)
+    .then(() => {
+      console.log("Connected to DataBase");
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
 
 const itemsSchema = new mongoose.Schema({
   name: String
@@ -41,7 +51,6 @@ const listSchema = new mongoose.Schema({
 });
 const List = mongoose.model("List", listSchema)
 
-
 app.get("/", function(req, res) {
      //item is a document
   item.find({}, function(err, data) {
@@ -55,7 +64,6 @@ app.get("/", function(req, res) {
     } else {
       res.render("list", {
         listTitle: "Today",
-        //data is an array
         newListItems: data
       });
     }
@@ -138,4 +146,5 @@ if(port==null || port==""){
 }
 app.listen(port, function() {
   console.log("Server started on port 3000");
+  connect();
 });

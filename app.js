@@ -51,11 +51,11 @@ const listSchema = new mongoose.Schema({
 });
 const List = mongoose.model("List", listSchema)
 
-app.get("/", function(req, res) {
+app.get("/", async function(req, res) {
      //item is a document
-  item.find({}, function(err, data) {
+  await item.find({}, async function(err, data) {
     if (data.length=== 0) {
-      item.insertMany(thing, function(err) {
+      await item.insertMany(thing, function(err) {
         if (err) {
           console.log(err);
         }
@@ -70,17 +70,17 @@ app.get("/", function(req, res) {
   });
 
 });
-app.get("/:customListName", function(req, res) {
+app.get("/:customListName",async function(req, res) {
   const customListName = _.capitalize(req.params.customListName);
 
-  List.findOne({ name: customListName}, function(err, data) {
+  await List.findOne({ name: customListName}, async function(err, data) {
     if (!err) {
       if (!data) {
         const lst = new List({
           name: customListName,
           item: thing
         });
-        lst.save();
+        await lst.save();
         res.redirect("/" + customListName);
       } else {
         res.render("list", {
@@ -92,7 +92,7 @@ app.get("/:customListName", function(req, res) {
     }
   });
 });
-app.post("/", function(req, res) {
+app.post("/", async function(req, res) {
 
   const itemName = req.body.newItem;
   const listName = req.body.list;
@@ -103,7 +103,7 @@ app.post("/", function(req, res) {
     it.save();
     res.redirect("/");
   } else {
-    List.findOne({name: listName}, function(err, data) {
+    await List.findOne({name: listName}, function(err, data) {
          if(!err){
               data.item.push(it);
              data.save();
@@ -118,18 +118,18 @@ app.post("/", function(req, res) {
 });
 
 
-app.post("/delete", function(req, res) {
+app.post("/delete", async function(req, res) {
      const checkItemById=req.body.checkbox;
      const listName=req.body.listName;
      if(listName==="Today"){
-          item.findByIdAndRemove(checkItemById,function(err){
+          await item.findByIdAndRemove(checkItemById,function(err){
                if(!err){
                     res.redirect("/");
                }
           });
      }
      else{
-          List.findOneAndUpdate(
+          await List.findOneAndUpdate(
                {name: listName},
                {$pull:{ item:{_id:checkItemById}}},
                function(err,data){
